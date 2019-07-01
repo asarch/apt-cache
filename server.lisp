@@ -27,12 +27,12 @@
 				(:html
 					(:head
 						"<meta charset='utf-8'>"
-						(:title "Paquetes de Debian"))
+						(:title "apt-cache online search tool"))
 				(:body
 					;; GET request
-					(:h1 "B&uacute;squeda")
+					(:h1 "Query Name")
 					((:form :action "/apt-cache" :method :post)
-						(:p "Paquete:"
+						(:p "Package name:"
 						((:input :type "text" :name "nombre"))
 						((:input :type "submit" :name "send"))))
 					
@@ -42,18 +42,17 @@
 							(setf nombre (cdr (assoc "nombre" (form-urlencoded-to-query (get-request-body req)) :test #'equal)))
 							(setf result (split-sequence #\newline (uiop:run-program `("apt-cache" "search" ,nombre) :output :string) :remove-empty-subseqs t))
 							
-							;; Aqui tienes que verificar que se hayan encontrado paquetes con ese nombre
 							(when (length result)
 								(html
-									(:h1 "Resultados")
-									(:p "Paquetes encontrados: " (:princ (length result)))
+									(:h1 "Results")
+									(:p (:princ (length result) " packages found"))
 									
 									(:table
 										(:thead
 											(:tr
 												(:th ((:input :type "checkbox")))
-												(:th "Nombre")
-												(:th "Descripci&oacute;n")))
+												(:th "Name")
+												(:th "Description")))
 										(:tbody
 											(loop for line in result while line do 
 												(html
@@ -63,10 +62,10 @@
 														(let ((values (split " - " line)))
 															(html
 																(:td (:princ (car values)))
-																(:td (:princ (cdr values))))))))))
+																(:td (:princ (format nil "~{~a~^ ~}" (cdr values)))))))))))
 											
 									(html
-										(:h1 "L&iacute;nea de comando")
+										(:h1 "Command line")
 										(:div
 										(:pre "apt-get -y install build-essential")
-										((:input :type "button" :name "copiar" :value "Copiar al portapapeles")))))))))))))))
+										((:input :type "button" :name "copy" :value "Copy string")))))))))))))))
