@@ -38,14 +38,16 @@
 					
 					;; POST request
 					(when (string-equal (request-method req) "POST")
-						(let ((result 0) (nombre (cdr (assoc "nombre" (form-urlencoded-to-query (get-request-body req)) :test #'equal))))
-							(format t "El nombre del paquete: ~a~%" nombre)
-							(setf result (uiop:run-program `("apt-cache" "search" ,nombre) :output :string))
+						(let (nombre (result 0))
+							(setf nombre (cdr (assoc "nombre" (form-urlencoded-to-query (get-request-body req)) :test #'equal)))
+							(setf result (split-sequence #\newline (uiop:run-program `("apt-cache" "search" ,nombre) :output :string) :remove-empty-subseqs t))
 							
 							;; Aqui tienes que verificar que se hayan encontrado paquetes con ese nombre
 							(when (length result)
 								(html
 									(:h1 "Resultados")
+									(:p "Paquetes encontrados: " (:princ (length result)))
+									
 									(:table
 										(:thead
 											(:tr
@@ -53,16 +55,18 @@
 												(:th "Nombre")
 												(:th "Descripci&oacute;n")))
 										(:tbody
-											(loop for line in (split-sequence #\newline result) do
+											(loop for line in result while line do 
 												(html
 													(:tr
 														(:td ((:input :type "checkbox")))
-											
-														(loop for value in (split " - " line) do
+														
+														(let ((values (split " - " line)))
 															(html
-																(:td value)))))))))
+																(:td (:princ (car values)))
+																(:td (:princ (cdr values))))))))))
+											
 									(html
 										(:h1 "L&iacute;nea de comando")
 										(:div
 										(:pre "apt-get -y install build-essential")
-										((:input :type "button" :name "copiar" :value "Copiar al portapapeles"))))))))))))))
+										((:input :type "button" :name "copiar" :value "Copiar al portapapeles")))))))))))))))
