@@ -41,7 +41,7 @@
 		(setf nombre (cdr (assoc "nombre" (form-urlencoded-to-query (get-request-body req)) :test #'equal)))
 		(setf result (split-sequence #\newline (uiop:run-program `("apt-cache" "search" ,nombre) :output :string) :remove-empty-subseqs t))
 							
-		(when (length result)
+		(when (not (zerop result))
 		  (html
 		   (:h1 "Results")
 									
