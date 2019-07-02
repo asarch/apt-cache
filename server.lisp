@@ -24,8 +24,11 @@
 	  (:html
 	   (:head
 	    "<meta charset='utf-8'>"
-	    "<link rel='stylesheet' type='text/css' href='/static/apt-cache.css' />"
+	    "<script type='text/javascript' src='/static/jquery-3.4.1.min.js'></script>"
+	    "<link rel='stylesheet' type='text/css' href='/static/w3.css' />"
+
 	    "<script type='text/javascript' src='/static/apt-cache.js'></script>"
+	    "<link rel='stylesheet' type='text/css' href='/static/apt-cache.css' />"
 	    (:title "apt-cache online search tool"))
 	   (:body
 	    ;; GET request
@@ -41,48 +44,49 @@
 		(setf nombre (cdr (assoc "nombre" (form-urlencoded-to-query (get-request-body req)) :test #'equal)))
 		(setf result (split-sequence #\newline (uiop:run-program `("apt-cache" "search" ,nombre) :output :string) :remove-empty-subseqs t))
 							
-		(when result
-		  (html
-		   (:h1 "Results")
+		(cond (result (html
+			       (:h1 "Results")
 									
-		   (:h2 "Filtering")
-		   (:p "Filter results:")
-		   ((:input :type "text" :name "filter"))
+			       (:h2 "Filtering")
+			       (:p "Filter results:")
+			       ((:input :type "text" :name "filter"))
 									
-		   (:p (:princ (length result) " packages found"))
+			       (:p (:princ (length result) " packages found"))
 									
-		   ((:table class "w3-table-all")
-		    (:thead
-		     (:tr
-		      (:th "#")
-		      (:th ((:input :type "checkbox")))
-		      (:th "Name")
-		      (:th "Description")))
-		    (:tbody
-		     (let ((number 0))
-		       (loop for line in result while line do
-			 (incf number)
-			 (html
-			  (:tr
-			   (:td (:princ number))
+			       ((:table class "w3-table-all")
+				(:thead
+				 (:tr
+				  (:th "#")
+				  (:th ((:input :type "checkbox")))
+				  (:th "Name")
+				  (:th "Description")))
+				(:tbody
+				 (let ((number 0))
+				   (loop for line in result while line do
+				     (incf number)
+				     (html
+				      (:tr
+				       (:td (:princ number))
 															
-			   (let ((checkbox-id (format nil "checkbox~d" number)))
-			     (html
-			      (:td ((:input :type "checkbox" :id checkbox-id)))))
+				       (let ((checkbox-id (format nil "checkbox~d" number)))
+					 (html
+					  (:td ((:input :type "checkbox" :id checkbox-id)))))
 														
-			   (let ((values (split " - " line :limit 2)))
-			     (html
-			      (:td (:princ (car values)))
+				       (let ((values (split " - " line :limit 2)))
+					 (html
+					  (:td (:princ (car values)))
 																	
-			      ;; Aqui esta el error:
-			      ;; Antes de ejecutar el script, debes de cambiar
-			      ;; el idioma de la sesion:
-			      ;;
-			      ;; export LC_ALL=en_US.UTF-8
-			      (:td (:princ (format nil "~{~a~^ ~}" (cdr values))))))))))))
+					  ;; Aqui esta el error:
+					  ;; Antes de ejecutar el script, debes de cambiar
+					  ;; el idioma de la sesion:
+					  ;;
+					  ;; export LC_ALL=en_US.UTF-8
+					  (:td (:princ (format nil "~{~a~^ ~}" (cdr values))))))))))))
 	
-		   (html
-		    (:h1 "Command line")
-		    (:div
-		     (:pre "apt-get -y install build-essential")
-		     ((:input :type "button" :name "copy" :value "Copy string")))))))))))))))
+			       (html
+				(:h1 "Command line")
+				(:div
+				 (:pre "apt-get -y install build-essential")
+				 ((:input :type "button" :name "copy" :value "Copy string"))))))
+
+		      (t (html (:p "No packages found")))))))))))))
