@@ -18,7 +18,7 @@
  :function
  #'(lambda (req ent)
      (with-http-response (req ent)
-       (with-http-body (req ent)
+       (with-http-body (req ent :external-format (crlf-base-ef :utf-8))
 	 (html
 	  "<!DOCTYPE html>"
 	  (:html
