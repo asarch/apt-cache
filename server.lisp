@@ -14,7 +14,7 @@
 
 (publish
  :path "/apt-cache"
- :content-type "text/htmll; charset=iso-8859-15"
+ :content-type "text/html; charset=iso-8859-15"
  :function
  #'(lambda (req ent)
      (with-http-response (req ent)
@@ -41,8 +41,8 @@
 	    ;; POST request
 	    (when (string-equal (request-method req) "POST")
 	      (let (nombre (result 0))
-		;;(setf nombre (cdr (assoc "nombre" (form-urlencoded-to-query (get-request-body req)) :test #'equal)))
-		(setf nombre (request-variable req "nombre"))
+		(setf nombre (cdr (assoc "nombre" (form-urlencoded-to-query (get-request-body req)) :test #'equal)))
+		;;(setf nombre (request-variable req "nombre"))
 		
 		(setf result (split-sequence #\newline (uiop:run-program `("apt-cache" "search" ,nombre) :output :string) :remove-empty-subseqs t))
 							
@@ -70,11 +70,11 @@
 				     (html
 				      (:tr
 				       (:td (:princ number))
-				       (:td ((:input :type "checkbox" :id (:princ (format nil "checkbox~d" number))))) 
+				       ;;(:td ((:input :type "checkbox" :id (:princ (format nil "checkbox~d" number))))) 
 															
-				       ;;(let ((checkbox-id (format nil "checkbox~d" number)))
-					;; (html
-					  ;;(:td ((:input :type "checkbox" :id checkbox-id)))))
+				       (let ((checkbox-id (format nil "checkbox~d" number)))
+					 (html
+					  (:td ((:input :type "checkbox" :id checkbox-id)))))
 														
 				       (let ((values (split " - " line :limit 2)))
 					 (html
